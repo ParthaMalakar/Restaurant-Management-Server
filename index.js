@@ -30,6 +30,15 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     })
+    app.get('/topsell', async (req, res) => {
+        
+        const topsellproduct = await foodsCollection
+        .find()
+        .sort({order_count: -1})
+        .limit(6)
+        .toArray();
+        res.send(topsellproduct);
+      })
    
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
