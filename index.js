@@ -26,8 +26,12 @@ async function run() {
 
     const foodsCollection = client.db('FoodDB').collection('FoodItems');
     app.get('/foods', async (req, res) => {
-      const cursor = foodsCollection.find();
-      const result = await cursor.toArray();
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      const result = await foodsCollection.find()
+      .skip(page * size)
+      .limit(size)
+      .toArray();
       res.send(result);
     })
     app.get('/topsell', async (req, res) => {
