@@ -22,7 +22,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    
+
 
     const foodsCollection = client.db('FoodDB').collection('FoodItems');
     const userCollection = client.db('FoodDB').collection('user');
@@ -30,27 +30,27 @@ async function run() {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
       const result = await foodsCollection.find()
-      .skip(page * size)
-      .limit(size)
-      .toArray();
+        .skip(page * size)
+        .limit(size)
+        .toArray();
       res.send(result);
     })
     app.get('/topsell', async (req, res) => {
-        
-        const topsellproduct = await foodsCollection
+
+      const topsellproduct = await foodsCollection
         .find()
-        .sort({order_count: -1})
+        .sort({ order_count: -1 })
         .limit(6)
         .toArray();
-        res.send(topsellproduct);
-      })
-   app.get('/search',async(req,res)=>{
-    const searchQuery = req.query.name;
-    console.log(searchQuery)
-    const results = await foodsCollection
-        .find({ food_name: { $regex: searchQuery, $options: 'i' } }) 
+      res.send(topsellproduct);
+    })
+    app.get('/search', async (req, res) => {
+      const searchQuery = req.query.name;
+      console.log(searchQuery)
+      const results = await foodsCollection
+        .find({ food_name: { $regex: searchQuery, $options: 'i' } })
         .toArray();
-   res.send(results)
+      res.send(results)
     })
     app.get('/foodsCount', async (req, res) => {
       const count = await foodsCollection.estimatedDocumentCount();
@@ -64,18 +64,18 @@ async function run() {
     })
     app.post('/user', async (req, res) => {
       const user = req.body;
-     
+
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
     app.patch('/foods', async (req, res) => {
       const food = req.body;
-      const filter = { _id:new ObjectId(food._id)  }
+      const filter = { _id: new ObjectId(food._id) }
       console.log(filter)
       const updateDoc = {
         $set: {
           order_count: food.order_count,
-          quantity:food.quantity
+          quantity: food.quantity
         }
       }
       console.log(updateDoc)
@@ -116,6 +116,28 @@ async function run() {
       const result = await foodsCollection.insertOne(newfood);
       res.send(result);
     })
+    app.put('/foods/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const updatedfood = req.body;
+
+      const food = {
+        $set: {
+          food_name: updatedfood.food_name,
+          food_image: updatedfood.food_image,
+          food_category: updatedfood.food_category,
+          quantity: updatedfood.quantity,
+          price: updatedfood.price,
+          food_origin: updatedfood.food_origin,
+          description: updatedfood.description
+        }
+      }
+
+      const result = await foodsCollection.updateOne(filter, food, options);
+      res.send(result);
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -128,10 +150,10 @@ run().catch(console.dir);
 
 
 
-app.get('/',(req,res)=>{
-    res.send('SERVER is Running');
+app.get('/', (req, res) => {
+  res.send('SERVER is Running');
 
 })
-app.listen(port,()=>{
-    console.log(`restaurent web server is running port${port}`)
+app.listen(port, () => {
+  console.log(`restaurent web server is running port${port}`)
 })
