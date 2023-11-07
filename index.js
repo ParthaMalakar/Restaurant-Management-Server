@@ -159,7 +159,10 @@ async function run() {
       const result = await userCollection.updateOne(filter, updateDoc);
       res.send(result);
     })
-    app.get('/food/:add_by', async (req, res) => {
+    app.get('/food/:add_by',verifyToken, async (req, res) => {
+      if(req.user.email !== req.params.add_by){
+        return res.status(403).send({message: 'forbidden access'})
+    }
       const add_by = req.params.add_by;
       console.log(add_by)
       const query = { Add_by: add_by }
