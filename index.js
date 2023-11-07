@@ -26,6 +26,12 @@ async function run() {
 
     const foodsCollection = client.db('FoodDB').collection('FoodItems');
     const userCollection = client.db('FoodDB').collection('user');
+    app.get('/foodsItem', async (req, res) => {
+     
+      const result = await foodsCollection.find()
+        .toArray();
+      res.send(result);
+    })
     app.get('/foods', async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
@@ -136,6 +142,17 @@ async function run() {
 
       const result = await foodsCollection.updateOne(filter, food, options);
       res.send(result);
+    })
+    app.post('/foodsByIds', async(req, res) =>{
+      const ids = req.body;
+      const idsWithObjectId = ids.map(id => new ObjectId(id))
+      const query = {
+        _id: {
+          $in: idsWithObjectId
+        }
+      }
+      const result = await foodsCollection.find(query).toArray();
+      res.send(result)
     })
 
     // Send a ping to confirm a successful connection
