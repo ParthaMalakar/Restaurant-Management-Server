@@ -137,6 +137,10 @@ async function run() {
     })
     app.get('/user/:email',logger,verifyToken, async (req, res) => {
       console.log('cookies',req.cookies)
+      console.log('token owner info', req.user)
+      if(req.user.email !== req.params.email){
+        return res.status(403).send({message: 'forbidden access'})
+    }
       const email = req.params.email;
       console.log(email)
       const query = { email: email }
