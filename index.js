@@ -82,6 +82,26 @@ async function run() {
       const result = await foodsCollection.updateOne(filter, updateDoc);
       res.send(result);
     })
+    app.get('/user/:email', async (req, res) => {
+      const email = req.params.email;
+      console.log(email)
+      const query = { email: email }
+      console.log(query)
+      const result = await userCollection.findOne(query);
+      res.send(result);
+    })
+    app.patch('/user', async (req, res) => {
+      const user = req.body;
+      const filter = { email: user.email }
+      const updateDoc = {
+        $set: {
+          Myorder: user.Myorder
+        }
+      }
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
