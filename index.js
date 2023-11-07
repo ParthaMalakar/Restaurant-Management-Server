@@ -74,14 +74,15 @@ async function run() {
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
-    app.patch('/foods', async (req, res) => {
+    app.put('/foods', async (req, res) => {
       const food = req.body;
       const filter = { _id: new ObjectId(food._id) }
       console.log(filter)
       const updateDoc = {
         $set: {
           order_count: food.order_count,
-          quantity: food.quantity
+          quantity: food.quantity,
+          time : food.time
         }
       }
       console.log(updateDoc)
