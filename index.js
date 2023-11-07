@@ -20,6 +20,20 @@ const logger = (req, res, next) =>{
   console.log('log: info', req.method, req.url);
   next();
 }
+const verifyToken = (req, res, next) =>{
+  const token = req?.cookies?.token;
+  
+  if(!token){
+      return res.status(401).send({message: 'unauthorized access'})
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) =>{
+      if(err){
+          return res.status(401).send({message: 'unauthorized access'})
+      }
+      req.user = decoded;
+      next();
+  })
+}
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.noswvlt.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -121,7 +135,7 @@ async function run() {
       const result = await foodsCollection.updateOne(filter, updateDoc);
       res.send(result);
     })
-    app.get('/user/:email', async (req, res) => {
+    app.get('/user/:email',logger,verifyToken, async (req, res) => {
       console.log('cookies',req.cookies)
       const email = req.params.email;
       console.log(email)
