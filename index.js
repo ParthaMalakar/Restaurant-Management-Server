@@ -101,7 +101,21 @@ async function run() {
       const result = await userCollection.updateOne(filter, updateDoc);
       res.send(result);
     })
+    app.get('/food/:add_by', async (req, res) => {
+      const add_by = req.params.add_by;
+      console.log(add_by)
+      const query = { Add_by: add_by }
+      console.log(query)
+      const result = await foodsCollection.find(query).toArray();
+      res.send(result);
+    })
 
+    app.post('/addfood', async (req, res) => {
+      const newfood = req.body;
+      console.log(newfood);
+      const result = await foodsCollection.insertOne(newfood);
+      res.send(result);
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
