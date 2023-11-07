@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -13,8 +14,12 @@ app.use(cors({
   ],
   credentials: true
 }));
+app.use(cookieParser());
 app.use(express.json());
-
+const logger = (req, res, next) =>{
+  console.log('log: info', req.method, req.url);
+  next();
+}
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.noswvlt.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -45,7 +50,11 @@ async function run() {
     }) .send({ success: true });
 
     })
-
+    app.post('/logout', async (req, res) => {
+      const user = req.body;
+      console.log('logging out', user);
+      res.clearCookie('token', { maxAge: 0 }).send({ success: true })
+  })
 
 
     app.get('/foodsItem', async (req, res) => {
@@ -97,9 +106,10 @@ async function run() {
       res.send(result);
     });
     app.put('/foods', async (req, res) => {
+      
       const food = req.body;
       const filter = { _id: new ObjectId(food._id) }
-      console.log(filter)
+      
       const updateDoc = {
         $set: {
           order_count: food.order_count,
@@ -107,11 +117,12 @@ async function run() {
           time : food.time
         }
       }
-      console.log(updateDoc)
+      
       const result = await foodsCollection.updateOne(filter, updateDoc);
       res.send(result);
     })
     app.get('/user/:email', async (req, res) => {
+      console.log('cookies',req.cookies)
       const email = req.params.email;
       console.log(email)
       const query = { email: email }
